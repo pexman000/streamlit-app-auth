@@ -5,6 +5,7 @@ Application Streamlit avec authentification et gestion des permissions
 import streamlit as st
 import streamlit_authenticator as stauth
 import yaml
+import copy
 from yaml.loader import SafeLoader
 from utils.audit import log_action
 
@@ -16,6 +17,22 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Fonction helper pour convertir st.secrets en dictionnaire Python
+def secrets_to_dict(secrets_obj):
+    """Convertit un objet st.secrets en dictionnaire Python modifiable"""
+    if hasattr(secrets_obj, 'to_dict'):
+        # Si l'objet a une méthode to_dict, l'utiliser
+        return secrets_obj.to_dict()
+    elif isinstance(secrets_obj, dict):
+        # Si c'est déjà un dict, créer une copie profonde
+        return {k: secrets_to_dict(v) for k, v in secrets_obj.items()}
+    elif hasattr(secrets_obj, 'keys'):
+        # Si c'est un objet dict-like (comme st.secrets), convertir récursivement
+        return {k: secrets_to_dict(secrets_obj[k]) for k in secrets_obj.keys()}
+    else:
+        # Valeur primitive, retourner telle quelle
+        return secrets_obj
+
 # Charger la configuration
 # Sur Streamlit Cloud, utiliser st.secrets
 # En local, utiliser config.yaml
@@ -24,15 +41,18 @@ config = None
 # Essayer d'abord avec st.secrets (Streamlit Cloud)
 try:
     _ = st.secrets['credentials']  # Vérifier si credentials existe
+    # Convertir st.secrets en dictionnaires Python (st.secrets est en lecture seule)
+    credentials_dict = secrets_to_dict(st.secrets['credentials'])
+    cookie_dict = secrets_to_dict(st.secrets['cookie'])
     # Récupérer preauthorized avec fallback
     try:
-        preauthorized = st.secrets['preauthorized']
+        preauthorized_dict = secrets_to_dict(st.secrets['preauthorized'])
     except (KeyError, AttributeError):
-        preauthorized = {'emails': []}
+        preauthorized_dict = {'emails': []}
     config = {
-        'credentials': st.secrets['credentials'],
-        'cookie': st.secrets['cookie'],
-        'preauthorized': preauthorized
+        'credentials': credentials_dict,
+        'cookie': cookie_dict,
+        'preauthorized': preauthorized_dict
     }
 except (KeyError, AttributeError, TypeError):
     # Secrets non configurés, essayer config.yaml (local)
