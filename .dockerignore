@@ -1,0 +1,50 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+
+# Fichiers de configuration sensibles (seront montés en volume ou passés via secrets)
+.streamlit/secrets.toml
+config.yaml
+.env
+
+# Logs
+logs/
+*.log
+audit.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Fichiers temporaires
+*.bak
+*.tmp
+temp_*.py
+fix_passwords.py
+generate_passwords_simple.py
+temp_login.py
+
+# Documentation (optionnel - décommenter si vous ne voulez pas l'inclure)
+# README.md
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/

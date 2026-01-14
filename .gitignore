@@ -1,0 +1,37 @@
+# Fichiers de configuration sensibles
+.streamlit/secrets.toml
+config.yaml
+
+# Environnement virtuel
+venv/
+env/
+.env
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Fichiers de données (optionnel - décommenter si vous ne voulez pas versionner les données)
+# data/*.csv
+
+# Logs
+logs/
+*.log
+audit.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
