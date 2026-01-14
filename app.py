@@ -19,21 +19,62 @@ st.set_page_config(
 # Charger la configuration
 # Sur Streamlit Cloud, utiliser st.secrets
 # En local, utiliser config.yaml
+config = None
+
+# Essayer d'abord avec st.secrets (Streamlit Cloud)
 try:
-    # Essayer d'abord avec st.secrets (Streamlit Cloud)
-    if 'credentials' in st.secrets:
-        config = {
-            'credentials': st.secrets['credentials'],
-            'cookie': st.secrets['cookie'],
-            'preauthorized': st.secrets.get('preauthorized', {'emails': []})
-        }
-    else:
-        # Fallback : charger depuis config.yaml (local)
+    _ = st.secrets['credentials']  # Vérifier si credentials existe
+    # Récupérer preauthorized avec fallback
+    try:
+        preauthorized = st.secrets['preauthorized']
+    except (KeyError, AttributeError):
+        preauthorized = {'emails': []}
+    config = {
+        'credentials': st.secrets['credentials'],
+        'cookie': st.secrets['cookie'],
+        'preauthorized': preauthorized
+    }
+except (KeyError, AttributeError, TypeError):
+    # Secrets non configurés, essayer config.yaml (local)
+    try:
         with open('config.yaml') as file:
             config = yaml.load(file, Loader=SafeLoader)
-except (FileNotFoundError, KeyError):
-    # Si ni st.secrets ni config.yaml ne sont disponibles
-    st.error("❌ Configuration non trouvée. Veuillez configurer les secrets sur Streamlit Cloud ou créer config.yaml")
+    except FileNotFoundError:
+        config = None
+
+# Si la configuration n'est toujours pas chargée
+if config is None:
+    st.error("""
+    ❌ **Configuration non trouvée**
+    
+    **Pour Streamlit Cloud :** Veuillez configurer les secrets :
+    
+    1. Allez sur [share.streamlit.io](https://share.streamlit.io)
+    2. Sélectionnez votre application
+    3. Cliquez sur **"⋮"** (menu) → **"Settings"** → **"Secrets"**
+    4. Collez la configuration au format TOML (voir `secrets.example.toml`)
+    
+    **Exemple de configuration minimale :**
+    ```toml
+    [credentials]
+    [credentials.usernames]
+    [credentials.usernames.admin]
+    email = "admin@example.com"
+    name = "Admin"
+    password = "$2b$12$..."
+    role = "admin"
+    
+    [cookie]
+    expiry_days = 30
+    key = "votre_cle_secrete_aleatoire_longue"
+    name = "streamlit_auth_cookie"
+    
+    [preauthorized]
+    emails = []
+    ```
+    
+    Pour plus de détails, consultez `DEPLOYMENT.md` ou `secrets.example.toml`.
+    """)
     st.stop()
 
 # Créer l'objet authenticator
