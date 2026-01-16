@@ -11,7 +11,7 @@ from utils.audit import log_action
 
 # Configuration de la page
 st.set_page_config(
-    page_title="Application Sécurisée",
+    page_title="AppFlorian Sécurisée",
     page_icon="🔐",
     layout="wide",
     initial_sidebar_state="expanded"
